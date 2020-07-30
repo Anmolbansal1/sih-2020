@@ -1,7 +1,7 @@
 from preprocess import preprocesses
 import os
 
-def img_to_face(input_datadir=os.path.join(os.getcwd(),'training_files','img'),output_datadir=os.path.join(os.getcwd(),'training_files','face')):
+def img_to_face(input_datadir=os.path.join(os.getcwd(),'face','training_files','img'),output_datadir=os.path.join(os.getcwd(),'face','training_files','face')):
 
 	obj=preprocesses(input_datadir,output_datadir)
 	nrof_images_total,nrof_successfully_aligned=obj.collect_data()

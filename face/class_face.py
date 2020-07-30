@@ -16,29 +16,32 @@ from datetime import datetime
 from train_main import train_again
 from data_preprocess import img_to_face
 from identify_webcam import test
-
 import warnings
+
 warnings.filterwarnings('ignore')
 
+def no0(x):
+	return (max(0,x))
 
 class face_model:
 	def __init__(self):
-		self.modeldir = os.path.join(os.getcwd(),'face','model','20170511-185253.pb')
+		self.modeldir = os.path.join(os.getcwd(),'face','model','20180402-114759.pb')
 		self.classifier_filename = os.path.join(os.getcwd(),'face','class','classifier.pkl')
 		self.npy=os.path.join(os.getcwd(),'face','npy')
 		self.MY_FACE_DIRECTORY=os.path.join(os.getcwd(),'face','training_files','face')
 		self.MY_IMG_DIRECTORY=os.path.join(os.getcwd(),'face','training_files','img')
 		self.TRAIN_FRAMES=[]
+		self.write_frames=[]
 		### DEBUGGER
-		self.counter=0
-
-		self.classes=os.listdir(os.path.join(os.getcwd(),'face','training_files','img'))
 
 		# constructor takes in list of classes
-		self.save_name='out.avi'
-		self.classes.sort()
-		self.classes=['Unknown']+self.classes
-		self.prediction_class=np.zeros((len(self.classes)+1))
+		self.save_name=None
+		# self.prediction_class=np.zeros((len(self.classes)))
+		self.classifier_filename_exp = os.path.expanduser(self.classifier_filename)
+		with open(self.classifier_filename_exp, 'rb') as infile:
+			(self.model, self.class_names,self.classes) = pickle.load(infile)
+		self.prediction_probs=np.zeros((1,len(self.classes)))
+
 		self.num_imgs=0
 		with tf.Graph().as_default():
 			self.gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
@@ -61,17 +64,15 @@ class face_model:
 				self.embedding_size = self.embeddings.get_shape()[1]
 
 
-				self.classifier_filename_exp = os.path.expanduser(self.classifier_filename)
-				with open(self.classifier_filename_exp, 'rb') as infile:
-				    (self.model, self.class_names) = pickle.load(infile)
+			
 
-				self.fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-				self.writer = None
-				print('Start Recognition!')
-				self.start_rec=False
+			self.fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+			print('Start Recognition!')
 
 	def predict(self,frame):
 
+		if self.save_name==None:
+			self.save_name='{}.mp4'.format(datetime.now())
 		frame = cv2.resize(frame, (0,0), fx=0.5, fy=0.5)    #resize frame (optional)
 
 		if frame.ndim == 2:
@@ -81,17 +82,9 @@ class face_model:
 		nrof_faces = bounding_boxes.shape[0]
 		# print('Face Detected: %d' % nrof_faces)
 
-		if self.start_rec:
-			if self.writer is None:
-				(h, w) = frame.shape[:2]
-				self.writer = cv2.VideoWriter(self.save_name, self.fourcc, 10,(w, h), True)
-			self.counter+=1
-			self.writer.write(frame)
+		self.write_frames.append(frame)
 
-		if nrof_faces > 0:
-			if self.start_rec==False:
-				print(datetime.now())
-				self.save_name='{}.avi'.format(datetime.now())
+		if nrof_faces > 0:				
 			self.start_rec=True
 			det = bounding_boxes[:, 0:4]
 			img_size = np.asarray(frame.shape)[0:2]
@@ -110,9 +103,15 @@ class face_model:
 				bb[i][3] = det[i][3]
 
 				# inner exception
-				if bb[i][0] <= 0 or bb[i][1] <= 0 or bb[i][2] >= len(frame[0]) or bb[i][3] >= len(frame):
-					print('face is too close')
-					continue
+				# if bb[i][0] <= 0 or bb[i][1] <= 0 or bb[i][2] >= len(frame[0]) or bb[i][3] >= len(frame):
+				# 	print('face is too close')
+				# 	continue
+
+				bb[i][0] = no0(bb[i][0])
+				bb[i][1] = no0(bb[i][1])
+				bb[i][2] = no0(bb[i][2])
+				bb[i][3] = no0(bb[i][3])
+
 
 				cropped.append(frame[bb[i][1]:bb[i][3], bb[i][0]:bb[i][2], :])
 				cropped[i] = facenet.flip(cropped[i], False)
@@ -123,32 +122,47 @@ class face_model:
 				feed_dict = {self.images_placeholder: scaled_reshape[i], self.phase_train_placeholder: False}
 				emb_array[0, :] = self.sess.run(self.embeddings, feed_dict=feed_dict)
 				predictions = self.model.predict_proba(emb_array)
-				# print(predictions)
-				if np.max(predictions) > 0.90:
-					self.prediction_class[np.argmax(predictions)+1]+=1
-				else:
-					self.prediction_class[0]+=1
+				print(predictions)
+				self.prediction_probs+=predictions
+				# if np.max(predictions) > 0.90:
+				# 	self.prediction_class[np.argmax(predictions)+1]+=1
+				# else:
+				# 	self.prediction_class[0]+=1
 				self.num_imgs+=1
 
 
 	def get_output(self):
 		if self.num_imgs>0:
-			return self.classes[np.argmax(self.prediction_class/self.num_imgs)]
+			self.prediction_probs/=self.num_imgs
+		return self.classes[np.argmax(self.prediction_probs)],self.prediction_probs,self.classes,self.num_imgs
+		# return self.classes[np.argmax(self.prediction_class/self.num_imgs)]
+
+	def save(self,label):
+		(h, w) = self.write_frames[0].shape[:2]
+		dir_=os.path.join(os.getcwd(),'face','my_classes',label)
+		if not os.path.exists(dir_):
+			os.makedirs(dir_)
+		writer = cv2.VideoWriter(os.path.join(dir_,self.save_name), self.fourcc, 10,(w, h), True)
+		for frame in self.write_frames:
+			writer.write(frame)
+
 
 	def reset(self):
-		self.prediction_class=np.zeros((len(self.classes)+1))
+		# self.prediction_class=np.zeros((len(self.classes)+1))
 		self.num_imgs=0
-		self.start_rec=False
-		self.save_name='out.avi'
+		self.save_name=None
 		self.TRAIN_FRAMES=[]
 
-	def save(self,label,to_save=True):
-		if to_save:
-			dir_=os.path.join(os.getcwd(),'face','my_classes',label)
-			if not os.path.exists(dir_):
-				os.makedirs(dir_)
-			shutil.copyfile(os.path.join(os.getcwd(),'face',self.save_name),os.path.join(dir_,self.save_name))
-		os.remove(os.path.join(os.getcwd(),'face',self.save_name))
+		self.write_frames=[]
+		### DEBUGGER
+
+		# constructor takes in list of classes
+
+		self.classifier_filename_exp = os.path.expanduser(self.classifier_filename)
+		with open(self.classifier_filename_exp, 'rb') as infile:
+			(self.model, self.class_names,self.classes) = pickle.load(infile)
+		self.prediction_probs=np.zeros((1,len(self.classes)))
+		print('Start Recognition!')
 
 	def re_train(self):
 		print('MAKING FACES')
@@ -163,6 +177,7 @@ class face_model:
 		for label in labels:
 			shutil.rmtree(os.path.join(self.MY_IMG_DIRECTORY,label))
 			shutil.rmtree(os.path.join(self.MY_FACE_DIRECTORY,label))
+			shutil.rmtree(os.path.join(os.getcwd(),'face','my_classes',label))
 		self.re_train()
 
 	def add_class(self,label):
@@ -171,12 +186,13 @@ class face_model:
 			os.makedirs(PATH)
 
 		for frame in self.TRAIN_FRAMES:
-			cv2.imwrite(os.path.join(PATH,'ActiOn_{}.png'.format(len[os.listdir(PATH)])),frame)
+			cv2.imwrite(os.path.join(PATH,'ActiOn_{}.png'.format(len(os.listdir(PATH)))),frame)
 		print('IMAGES ADDED IN DIRECTORY')
 		self.re_train()
 
 
 if __name__=='__main__':
+	THRESHOLD=0.8
 	fm=face_model()
 	delete_state=input('Do you want to delete a label  Y/n   \t--> ')
 	while delete_state=='Y' or delete_state=='y':
@@ -200,9 +216,13 @@ if __name__=='__main__':
 	video_capture.release()
 	cv2.destroyAllWindows()
 
-	pred=fm.get_output()
+	pred,probs_out,_,ng=fm.get_output()
+	print("probs_out ",probs_out)
+	if np.max(probs_out)<THRESHOLD:
+		pred='Unknown'
+	print(pred,probs_out)
 	if pred!=None and pred!='Unknown':
-		print(pred)
+		print(pred,probs_out)
 		fm.save(pred)
 	# fm.remove_class(['Aditya Raj'])
 	if pred=='Unknown':
@@ -210,7 +230,7 @@ if __name__=='__main__':
 		access=input('allow Unknown User Access Y/n   \t -->')
 		if access=='Y' or access=='y':
 			new_username=input('give new username\t--> ')
-			fm.add_class(new_username)
+			# fm.add_class(new_username)
 			fm.save(new_username)
 		else:
 			print('USER ACCESS DENIED')

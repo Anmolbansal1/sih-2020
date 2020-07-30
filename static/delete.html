@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% set active_page = "users" %}
+{% block title %}Delete{% endblock %}
+{% block head %}
+      <style>
+         body {
+         font: 400 15px Lato, sans-serif;
+         line-height: 1.8;
+         color: #818181;
+         }
+         .navbar {
+         font-family: Montserrat, sans-serif;
+         }
+         #loader
+{
+    position:fixed;
+    left: 50%;
+    top: 35%;
+    display: none;
+    /*background: transparent url("../images/loading-big.gif");*/
+    z-index: 1000;
+    height: 31px;
+    width: 31px;
+}
+      </style>
+{% endblock %}
+{% block content %}
+       <main role="main">
+         <div class="container" style="padding-top: 20px; margin-left: auto;">
+            <div class="container">
+               <table class="table">
+                  <thead id="table-results" class="thead-light" >
+                     <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Delete</th>
+                     </tr>
+                  </thead>
+                  <tbody id="table-result-rows">
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      </main>
+      <!-- Image loader -->
+<div id='loader'>
+  <img src='{{ url_for("static", filename="ajax-loader.gif") }}' width='32px' height='32px'>
+</div>
+<!-- Image loader -->
+
+
+      <script src="{{ url_for('static', filename='js/delete_script.js') }}" > </script>
+
+{% endblock %}

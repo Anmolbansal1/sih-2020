@@ -19,7 +19,7 @@ class training:
     def main_train(self):
         with tf.Graph().as_default():
             with tf.Session() as sess:
-                img_data = facenet.get_dataset(self.datadir)
+                img_data,class_list = facenet.get_dataset(self.datadir)
                 path, label = facenet.get_image_paths_and_labels(img_data)
                 print('Classes: %d' % len(img_data))
                 print('Images: %d' % len(path))
@@ -54,6 +54,6 @@ class training:
                 class_names = [cls.name.replace('_', ' ') for cls in img_data]
 
                 # Saving model
-                with open(classifier_file_name, 'wb') as outfile:
-                    pickle.dump((model, class_names), outfile)
+                with open(classifier_file_name, 'wb+') as outfile:
+                    pickle.dump((model, class_names,class_list), outfile)
                 return classifier_file_name

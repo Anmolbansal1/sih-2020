@@ -40,6 +40,7 @@ import random
 import re
 from tensorflow.python.platform import gfile
 import cv2
+import pickle
 
 def triplet_loss(anchor, positive, negative, alpha):
     """Calculate the triplet loss according to the FaceNet paper
@@ -337,7 +338,7 @@ def get_dataset(paths, has_class_directories=True):
             image_paths = get_image_paths(facedir)
             dataset.append(ImageClass(class_name, image_paths))
   
-    return dataset
+    return dataset,classes
 
 def get_image_paths(facedir):
     image_paths = []

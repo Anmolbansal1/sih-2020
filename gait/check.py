@@ -8,22 +8,24 @@ from scipy.misc import imresize, imread
 
 
 net_pose = HumanPoseIRNetwork()
-net_pose.restore('models/Human3.6m.ckpt')
+net_pose.restore('./gait/models/Human3.6m.ckpt')
 
 def read_video(video_addr):
     imgs=[]
     video_capture = cv2.VideoCapture(video_addr)
     while True:
         ret, frame = video_capture.read()
+        print(frame)
         try:
             frame=np.reshape(cv2.resize(cv2.cvtColor(frame,cv2.COLOR_BGR2RGB),(299,299)),(1,299,299,3))
         except:
             break
         imgs.append(frame)
+        break
     print(len(imgs))
     return imgs
 
-imgs=read_video('./training_files/videos/Bansal/002.mp4')
+imgs=read_video('./gait/training_files/videos/Bansal/002.mp4')
 for img in imgs:
     print(img)
     if len(np.shape(img))==3:

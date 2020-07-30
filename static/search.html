@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% set active_page = "search" %}
+{% block title %}Search Logs{% endblock %}
+{% block head %}
+  <style>
+         body {
+         font: 400 15px Lato, sans-serif;
+         line-height: 1.8;
+         color: #818181;
+         }
+         .navbar {
+         font-family: Montserrat, sans-serif;
+         }
+      </style>
+{% endblock %}
+{% block content %}
+      <main role="main">
+         <div class="container" style="padding-top: 20px; margin-left: auto;">
+            <section class="jumbotron text-center">
+               <div>
+                  <div class="form-group">
+                     <label for="autocomplete">Select persons</label>
+                     <input id="autocomplete" class="form-control" aria-describedby="personHelpBlock">
+                     <small id="personHelpBlock" class="form-text text-muted">
+                     Select all persons whose logs needs to be fetched.
+                     </small>
+                  </div>
+                  <div class="form-group">
+                     <label for="selectedPersons" id="feed_info" style="display: none;">Selected persons.</label>
+                     <p id="feed_list">
+                     </p>
+                     <small id="selectedPersonsHelpBlock" class="form-text text-muted" style="display: none;">
+                     Click on person to remove it.
+                     </small>
+                  </div>
+               </div>
+               <div class="form-group">
+                  <div class="form-group" style="margin-bottom: 10px;">
+                     <label for="start_time">Start date</label>
+                     <input id="start_time" type="datetime-local" class="form-control" autocomplete="on" />
+                  </div>
+                  <div class="form-group">
+                     <label for="end_time">End date</label>
+                     <input id="end_time" type="datetime-local" class="form-control" autocomplete="on" />
+                  </div>
+               </div>
+               <button id="submit" class="btn btn-primary">SEARCH</button>
+            </section>
+            <div class="container">
+            <table class="table">
+               <thead id="table-results" class="thead-light" style="display: none;">
+                  <tr>
+                     <th scope="col">#</th>
+                     <th scope="col">Name</th>
+                     <th scope="col">Time</th>
+                     <th scope="col">Videos</th>
+                  </tr>
+               </thead>
+               <tbody id="table-result-rows">
+               </tbody>
+            </table>
+            </div>
+         </div>
+      </main>
+         <!-- Modal -->
+         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h5 class="modal-title" id="exampleModalLabel">Recorded Videos</h5>
+                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                     <span aria-hidden="true">&times;</span>
+                     </button>
+                  </div>
+                  <div id="modal-videos-holder" class="modal-body">
+                     <video id="vid1" controls></video>
+                     <video id="vid2" controls></video>
+                  </div>
+                  <div class="modal-footer">
+                     <button id="modal-videos-close" type="button" class="btn btn-secondary">Close</button>
+                  </div>
+               </div>
+            </div>
+         </div>
+      <script src='{{url_for("static",filename="js/searchScript.js")}}'></script>
+{% endblock %}

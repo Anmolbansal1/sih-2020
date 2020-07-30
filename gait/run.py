@@ -35,20 +35,29 @@ def read_video(video_addr):
 	return imgs
 
 class everything:
-	def __init__(self,train_input_datadir,train_output_datadir,test_input_datadir=None,test_output_datadir=None):
+	def __init__(self,train_input_datadir,train_output_datadir,test_input_datadir=None,test_output_datadir=None,net_pose=None,net_gait=None):
 		self.in_dir=train_input_datadir
 		self.out_dir=train_output_datadir
 
-		self.net_pose=HumanPoseIRNetwork()
-		self.net_gait=GaitNetwork(recurrent_unit = 'GRU', rnn_layers = 2)
-		self.net_pose.restore(os.path.join(os.getcwd(),'models','Human3.6m.ckpt'))
-		self.net_gait.restore(os.path.join(os.getcwd(),'models','H3.6m-GRU-1.ckpt'))
+		if net_pose==None or net_gait==None:
+			self.net_pose=HumanPoseIRNetwork()
+			self.net_gait=GaitNetwork(recurrent_unit = 'GRU', rnn_layers = 2)
+			self.net_pose.restore(os.path.join(os.getcwd(),'models','Human3.6m.ckpt'))
+			self.net_gait.restore(os.path.join(os.getcwd(),'models','H3.6m-GRU-1.ckpt'))
+
+		else:
+			self.net_gait=net_gait
+			self.net_pose=net_pose
 
 		self.path_to_test_videos=test_input_datadir
 		self.path_to_test_frames=test_output_datadir
 
-		self.label_filename=os.path.join(os.getcwd(),'saved_files','labelencoder.pkl')
-		self.classifier_filename=os.path.join(os.getcwd(),'saved_files','classifier.pkl')
+		if net_pose==None or net_gait==None:
+			self.label_filename=os.path.join(os.getcwd(),'saved_files','labelencoder.pkl')
+			self.classifier_filename=os.path.join(os.getcwd(),'saved_files','classifier.pkl')
+		else:
+			self.label_filename=os.path.join(os.getcwd(),'gait','saved_files','labelencoder.pkl')
+			self.classifier_filename=os.path.join(os.getcwd(),'gait','saved_files','classifier.pkl')
 
 	def check_frames(self,in_dir,out_dir):
 		if not os.path.exists(in_dir):
@@ -116,16 +125,18 @@ class everything:
 		le=LabelEncoder()
 		label=le.fit_transform(label)
 
-		train_feature,val_feature,train_label,val_label=train_test_split(features,label,test_size=0.1,random_state=0)
-		print('Training on {} rows   AND    validation on {} rows'.format(np.shape(train_feature)[0],np.shape(val_feature)[0]))
+		# train_feature,val_feature,train_label,val_label=train_test_split(features,label,test_size=0.1,random_state=0)
+		# print('Training on {} rows   AND    validation on {} rows'.format(np.shape(train_feature)[0],np.shape(val_feature)[0]))
+		print("Training on all features {}".format(np.shape(features)[0]))
 		model = SVC(kernel='linear', probability=True)
-		model.fit(train_feature, train_label)
+		model.fit(features, label)
 		print('TRAINING DONE')
-		print('Accuracy on training set --\t{}'.format(model.score(train_feature,train_label)*100))
-		print('Accuracy on validation set --\t{}'.format(model.score(val_feature,val_label)*100))
+		print('Accuracy on training set --\t{}'.format(model.score(features,label)*100))
+		# print('Accuracy on validation set --\t{}'.format(model.score(val_feature,val_label)*100))
 		
 		with open(self.label_filename, 'wb+') as outfile:
 			pickle.dump(le, outfile)
+		print(le.classes_)
 		print('SAVED LABELENCODER ')
 		
 		with open(self.classifier_filename, 'wb+') as outfile:

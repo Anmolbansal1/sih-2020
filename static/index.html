@@ -1,44 +1,71 @@
-<!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>Team NARCOS</title>
-      <script src="https://unpkg.com/@tensorflow/tfjs"></script>
-    <!-- Load Posenet -->
-    <script src="https://unpkg.com/@tensorflow-models/posenet"></script>
+{% extends "base.html" %}
+{% set active_page = "index" %}
+{% block title %}Home{% endblock %}
+{% block head %}
+     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+  <!-- Load the coco-ssd model. -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 
-  <script src='{{url_for("static",filename="jquery.js")}}'></script>
+  <script src='{{url_for("static",filename="js/jquery.js")}}'></script>
   
-  <script src='{{url_for("static",filename="webcam.js")}}'></script>
-</head>
-<body>
+  <script src='{{url_for("static",filename="js/webcam.js")}}'></script>
+  <style>
+         body {
+         font: 400 15px Lato, sans-serif;
+         line-height: 1.8;
+         color: #818181;
+         }
+         .navbar {
+         font-family: Montserrat, sans-serif;
+         }
+      </style>
+{% endblock %}
+{% block content %}
+    <main role="main">
+      <div class="jumbotron">
+        <div class="container">
+          <h1 class="display-3">Identification Dashboard!</h1>
+          <p>This is monitoring dashboard for dynamic authentication system.</p>
+          <p><a class="btn btn-primary btn-lg" href="/about" role="button">Learn more »</a></p>
+        </div>
+      </div>
 <!-- partial:index.partial.html -->
-<!DOCTYPE html>
-<html lang="en" >
-<body>
-<!-- partial:index.partial.html -->
-<div class="hed">
-  <div id='hd1'><center><h3>Traffic Predictor For Autonomous Cars</h3></center></div>
-</div>
-  
+<div>
 <div id="app">
   <div id="cam1"></div>
   <div id="cam2"></div>
 </div>
-  <button id="btn">start</button>
+<div>
+  <button id="btn" class="btn btn-primary">start</button>
+</div>
+<div id="hide" style="display: flex;">
+<canvas id="canvas1" crossorigin='anonymous' style="display: none;"></canvas>
 
-<div id="hide">
+<img id="gait1" src="">
+</div>
+
+<div class="container" style="margin-left: auto;">
+  <div class="row" style="justify-content: center;">
+<button id='allow' disabled='true' class="btn btn-success" style="margin-right: 20px;">Grant access</button>
+<button id='deny' disabled='true' class="btn btn-danger">Deny access</button>
+</div>
+<br/>
+<div class="row" style="justify-content: center;">
+<input id='user_name' disabled='true' style="margin-right: 20px; display: none;" />
+<button id='go' disabled='true' class="btn btn-warning" style="display: none;">allow user</button>
+<h2 id="user"> </h2>
+</div>
+</div>
+<button id='train_it' style=""><h2>train all</h2></button>
 
 </div>
+</main>
 
 </body>
 </html>
 <!-- partial -->
 
-  <script  src='{{url_for("static",filename="script.js")}}'>
+  <script  src='{{url_for("static",filename="js/script.js")}}'>
    
   </script>
-
-  
-</body>
-</html>
+{% endblock %}

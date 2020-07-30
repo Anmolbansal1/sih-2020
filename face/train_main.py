@@ -5,8 +5,8 @@ import sys
 from classifier import training
 import os
 
-def train_again(datadir=os.path.join(os.getcwd(),'training_files','face'),modeldir=os.path.join(os.getcwd(),'model','20170511-185253.pb'),
-	classifier_filename=os.path.join(os.getcwd(),'class','classifier.pkl')):
+def train_again(datadir=os.path.join(os.getcwd(),'face','training_files','face'),modeldir=os.path.join(os.getcwd(),'face','model','20180402-114759.pb'),
+	classifier_filename=os.path.join(os.getcwd(),'face','class','classifier.pkl')):
 
 	print ("Training Start")
 	obj=training(datadir,modeldir,classifier_filename)

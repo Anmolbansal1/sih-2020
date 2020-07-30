@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% set active_page = "about" %}
+{% block title %}About{% endblock %}
+{% block head %}
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <style>
+         body {
+         font: 400 15px Lato, sans-serif;
+         line-height: 1.8;
+         color: #818181;
+         }
+         .jumbotron {
+         font-family: Montserrat, sans-serif;
+         background-color: #343a40; /* Orange */
+         color: #ffffff;
+         }
+         .bg-grey {
+         background-color: #f6f6f6;
+         }
+         .container-fluid {
+         padding: 60px 50px;
+         }
+         .logo {
+         font-size: 200px;
+         }
+         .fa {
+         font-size: 100px;
+         }
+         @media screen and (max-width: 768px) {
+         .col-sm-4 {
+         text-align: center;
+         margin: 25px 0;
+         }
+         }
+         .navbar {
+         font-family: Montserrat, sans-serif;
+         }
+      </style>
+{% endblock %}
+{% block content %}
+      <main role="main">
+         <div class="jumbotron text-center">
+            <h1>Auth</h1>
+            <p>Dynamic Authentication System</p>
+         </div>
+         <div class="container-fluid">
+            <div class="row">
+               <div class="col-sm-8">
+                  <h2>GAIT Recognition</h2>
+                  <p>It utilizes gait recognition to improve accuracy.</p>
+               </div>
+               <div class="col-sm-4">
+                  <!-- <span class="glyphicon glyphicon-signal logo"></span> -->
+                  <i class="fa fa-address-book" aria-hidden="true"></i>
+               </div>
+            </div>
+         </div>
+         <div class="container-fluid bg-grey">
+            <div class="row">
+               <div class="col-sm-4">
+                  <i class="fa fa-address-book" aria-hidden="true"></i>
+               </div>
+               <div class="col-sm-8">
+                  <h2>Track Attendance</h2>
+                  <p>It can be utilized to track attendance of persons.</p>
+               </div>
+            </div>
+         </div>
+
+         <div class="container-fluid">
+            <div class="row">
+               <div class="col-sm-8">
+                  <h2>Lorem ipsum..</h2>
+                  <h4>Lorem ipsum..</h4>
+                  <p>Lorem ipsum..</p>
+               </div>
+               <div class="col-sm-4">
+                  <i class="fa fa-address-book" aria-hidden="true"></i>
+               </div>
+            </div>
+         </div>
+      </main>
+{% endblock %}
