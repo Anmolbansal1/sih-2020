@@ -179,6 +179,12 @@ class face_model:
 			shutil.rmtree(os.path.join(self.MY_FACE_DIRECTORY,label))
 			shutil.rmtree(os.path.join(os.getcwd(),'face','my_classes',label))
 		self.re_train()
+		
+	def add_frames(self,label):
+		PATH=os.path.join(self.MY_IMG_DIRECTORY,label)
+		for frame in self.TRAIN_FRAMES:
+			cv2.imwrite(os.path.join(PATH,'ActiOn_{}.png'.format(len(os.listdir(PATH)))),frame)
+		print('IMAGES ADDED IN DIRECTORY')
 
 	def add_class(self,label):
 		PATH=os.path.join(self.MY_IMG_DIRECTORY,label)
@@ -187,7 +193,7 @@ class face_model:
 
 		for frame in self.TRAIN_FRAMES:
 			cv2.imwrite(os.path.join(PATH,'ActiOn_{}.png'.format(len(os.listdir(PATH)))),frame)
-		print('IMAGES ADDED IN DIRECTORY')
+		print('IMAGES ADDED IN DIRECTORY AND RETRAINING')
 		self.re_train()
 
 
