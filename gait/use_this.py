@@ -87,6 +87,16 @@ class run_this:
 		shutil.rmtree(path_video)
 		self.train()
 
+	def add_frames(self,frames,label):
+		PATH=os.path.join(os.getcwd(),'gait','training_files','videos',label)
+		if not os.path.exists(PATH):
+			os.makedirs(PATH)
+			print("ADDED NEW USER")
+
+		file_name='{}.mp4'.format(len(os.listdir(PATH)))
+		save_name=os.path.join(PATH,file_name)
+		self.make_video(frames,save_name)
+	
 	def add_user(self,frames,label):
 		PATH=os.path.join(os.getcwd(),'gait','training_files','videos',label)
 		if not os.path.exists(PATH):
