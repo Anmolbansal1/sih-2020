@@ -341,11 +341,21 @@ def get_dataset(paths, has_class_directories=True):
     return dataset,classes
 
 def get_image_paths(facedir):
-    image_paths = []
-    if os.path.isdir(facedir):
-        images = os.listdir(facedir)
-        image_paths = [os.path.join(facedir,img) for img in images]
-    return image_paths
+	image_paths = []
+	threshold=1000
+	mList=[]
+	if os.path.isdir(facedir):
+		images = os.listdir(facedir)
+		if len(images)<threshold:
+			image_paths = [os.path.join(facedir,img) for img in images]
+		else:
+			for x in images:
+				name=x
+				name.split('_')
+				if name[1]+threshold>=len(images):
+					mList.append(x)
+			image_paths=[os.path.join(facedir,img) for img in mList]
+	return image_paths
   
 def split_dataset(dataset, split_ratio, mode):
     if mode=='SPLIT_CLASSES':
