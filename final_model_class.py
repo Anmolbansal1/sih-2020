@@ -32,6 +32,8 @@ class final_model_():
 		face=dict()
 		gait=dict()
 		print(self.face_classes)
+		if len(self.face_classes) != len(self.gait_classes):
+			return "unknown",0,0,0
 		for x in range(len(self.face_classes)):
 			face[self.face_classes[x]]=self.face_probs[x]
 
@@ -46,7 +48,7 @@ class final_model_():
 
 		print("FINAL --> VALUE--> {}  INDEX--> {}".format(max_final_val,max_final_name))
 		self.name=max_final_name
-		return "unknown",max_final_val,self.face_probs[np.argmax(probs_final)],self.gait_probs[np.argmax(probs_final)]
+		return max_final_name,max_final_val,self.face_probs[np.argmax(probs_final)],self.gait_probs[np.argmax(probs_final)]
 
 
 
