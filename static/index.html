@@ -6,7 +6,7 @@
   <!-- Load the coco-ssd model. -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 
-  <script src='{{url_for("static",filename="js/jquery.js")}}'></script>
+  <!-- <script src='{{url_for("static",filename="js/jquery.js")}}'></script> -->
   
   <script src='{{url_for("static",filename="js/webcam.js")}}'></script>
   <style>
@@ -31,6 +31,10 @@
       </div>
 <!-- partial:index.partial.html -->
 <div>
+  <div class="row" style="justify-content: center;">
+<h2 id="user"> </h2>
+</div>
+
 <div id="app">
   <div id="cam1"></div>
   <div id="cam2"></div>
@@ -46,21 +50,92 @@
 
 <div class="container" style="margin-left: auto;">
   <div class="row" style="justify-content: center;">
-<button id='allow' disabled='true' class="btn btn-success" style="margin-right: 20px;">Grant access</button>
+<button id='allow'  class="btn btn-success" style="margin-right: 20px;">Grant access</button>
 <button id='deny' disabled='true' class="btn btn-danger">Deny access</button>
 </div>
 <br/>
-<div class="row" style="justify-content: center;">
-<input id='user_name' disabled='true' style="margin-right: 20px; display: none;" />
-<button id='go' disabled='true' class="btn btn-warning" style="display: none;">allow user</button>
-<h2 id="user"> </h2>
 </div>
-</div>
-<button id='train_it' style=""><h2>train all</h2></button>
+<button id='train_it' style="display: none;"><h2>train all</h2></button>
 
 </div>
 </main>
+<!-- Modal -->
+         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h5 class="modal-title" id="exampleModalLabel">Grant Access</h5>
+                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                     <span aria-hidden="true">&times;</span>
+                     </button>
+                  </div>
+                  <form>
+  <div class="form-group row">
+    <label for="inputName" class="col-sm-2 col-form-label">Name</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="user_name" placeholder="Name">
+    </div>
+  </div>
+  <fieldset class="form-group">
+    <div class="row">
+      <legend class="col-form-label col-sm-2 pt-0">Radios</legend>
+      <div class="col-sm-10">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="gridRadios" id="vis" value="option1" checked>
+          <label class="form-check-label" for="gridRadios1">
+            Visitor
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="gridRadios" id="temp" value="option2">
+          <label class="form-check-label" for="gridRadios2">
+            Temporary
+          </label>
+        </div>
+        <div class="form-check disabled">
+          <input class="form-check-input" type="radio" name="gridRadios" id="perm" value="option3">
+          <label class="form-check-label" for="gridRadios3">
+            Permanent
+          </label>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+  <div class="form-group row">
+  <label for="example-date-input" class="col-2 col-form-label">Date</label>
+  <div class="col-10">
+    <input class="form-control" type="date" value="2011-08-19" id="date">
+  </div>
+</div>
+  <div class="form-group row">
+    <div class="col-sm-10">
+      <button id='go' type="submit" class="btn btn-warning">Allow User</button>
+    </div>
+  </div>
+</form>
+                  <!-- <div class="custom-control custom-radio custom-control-inline">
+  <input type="radio" id="customRadioInline1" name="customRadioInline1" class="custom-control-input">
+  <label class="custom-control-label" for="customRadioInline1">Visitor</label>
+</div>
+<div class="custom-control custom-radio custom-control-inline">
+  <input type="radio" id="customRadioInline2" name="customRadioInline1" class="custom-control-input">
+  <label class="custom-control-label" for="customRadioInline2">Temporary</label>
+</div>
 
+<div class="custom-control custom-radio custom-control-inline">
+  <input type="radio" id="customRadioInline2" name="customRadioInline1" class="custom-control-input">
+  <label class="custom-control-label" for="customRadioInline2">Permanent</label>
+</div>
+                  <div class="row" style="justify-content: center;">
+                    <input id='user_name' disabled='true' style="margin-right: 20px; display: none;" />
+                    <button id='go' disabled='true' class="btn btn-warning" style="display: none;">allow user</button>
+                  </div> -->
+                  <div class="modal-footer">
+                     <button id="modal-videos-close" type="button" class="btn btn-secondary">Close</button>
+                  </div>
+               </div>
+            </div>
+         </div>
 </body>
 </html>
 <!-- partial -->

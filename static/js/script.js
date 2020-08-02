@@ -242,10 +242,11 @@ function final_face(){
 
 }
 
-
+// type_ - PERM, TEMP, VIS
 function grant_access(name){
   if(name=="unknown"){
     document.getElementById("user").innerHTML="Unknown person entering ";
+    $("#user").setAttr("style", "color:red;");
     do_something()
   }
    else{
@@ -253,10 +254,32 @@ function grant_access(name){
     data={
       "user":name
     }
-    $.post("access",data,function(v,status){
+    $.post("access2",data,function(v,status){
       console.log(v)
     })
    }
+}
+
+function grant_access2(){
+    name = document.getElementById('user_name').value;
+    option = ""
+    if (document.getElementById('temp').checked) {
+      option = "TEMP"
+    } else if (document.getElementById('vis').checked) {
+      option = "VIS"
+    } else {
+      option = "PERM"
+    }
+    date = document.getElementById('date').value;
+    display(name)
+    data={
+      "user":name,
+      "option": option,
+      "date": date
+    }
+    $.post("access",data,function(v,status){
+      console.log(v)
+    })
 }
 
 function do_something(){
@@ -271,16 +294,17 @@ document.getElementById("go").addEventListener("click",allow_user);
 function get_user(){
 
   // add diplay
-  document.getElementById('user_name').setAttribute("style", "display: block;")
-  document.getElementById('go').setAttribute("style", "display: block;")
+  // document.getElementById('user_name').setAttribute("style", "display: block;")
+  // document.getElementById('go').setAttribute("style", "display: block;")
+  $('#myModal').modal('toggle');
   document.getElementById('user_name').disabled=false;
   document.getElementById('go').disabled=false;
-
 }
 
 function deny_user(){
   grant_access("terrorist")
   document.getElementById("user").innerHTML=""
+  $("#user").removeAttr("style");
   document.getElementById('allow').disabled=true;
   document.getElementById('go').disabled=true;
   document.getElementById('deny').disabled=true;
@@ -289,13 +313,15 @@ function deny_user(){
 }
 
 function allow_user(){
-  x=document.getElementById('user_name').value;
-  grant_access(x)
+  // x=document.getElementById('user_name').value;
+  grant_access2()
   document.getElementById('allow').disabled=true;
   document.getElementById('go').disabled=true;
   document.getElementById('deny').disabled=true;
   document.getElementById('user_name').disabled=true;
   document.getElementById('user_name').value="";
+  $("#user").removeAttr("style");
+  $('#myModal').modal('toggle');
 }
 
 
@@ -315,4 +341,11 @@ function call_train(){
   $.get("train",function(v,status){
     console.log(v)
   })
+}
+
+document.getElementById("modal-videos-close").addEventListener("click", closeModal)
+
+function closeModal() {
+  // $("#modal-videos-holder").empty();
+  $('#myModal').modal('toggle');
 }
