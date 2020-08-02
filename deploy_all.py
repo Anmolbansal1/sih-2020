@@ -243,6 +243,16 @@ def grant():
 
 	return {"key":"done"}
 
+@app.route('/access2',methods=["POST"])
+def add2():
+	name=request.form["user"]
+
+	fm.add_frames(name)
+	# inst.add_frames()
+	inst.add_frames(final_model.gait_frames_center,name)
+
+	return {"key":"done"}
+
 
 
 @app.route('/train',methods=['GET'])

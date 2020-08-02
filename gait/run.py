@@ -38,8 +38,7 @@ class everything:
 	def __init__(self,train_input_datadir,train_output_datadir,test_input_datadir=None,test_output_datadir=None,net_pose=None,net_gait=None):
 		self.in_dir=train_input_datadir
 		self.out_dir=train_output_datadir
-		self.threshold=50
-		
+
 		if net_pose==None or net_gait==None:
 			self.net_pose=HumanPoseIRNetwork()
 			self.net_gait=GaitNetwork(recurrent_unit = 'GRU', rnn_layers = 2)
@@ -100,14 +99,7 @@ class everything:
 		print('MAKING DATA')
 		feature_label=[]
 		for x in os.listdir(out_dir):
-			if len(os.listdir(os.path.join(out_dir,x)))<self.threshold:
-				mList=os.listdir(os.path.join(out_dir,x))
-			else:
-				mList=os.listdir(os.path.join(out_dir,x))
-				mList.sort()
-				mList=mList[:-self.threshold]
-
-			for y in mList:
+			for y in os.listdir(os.path.join(out_dir,x)):
 				frame=np.load(os.path.join(out_dir,x,y))
 				features,_=self.net_gait.feed_forward(frame)
 				feature_label.append([features,x])
