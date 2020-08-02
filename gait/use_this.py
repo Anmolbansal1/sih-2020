@@ -66,11 +66,11 @@ class run_this:
 		label_vis=le_vis.inverse_transform(output_vis)
 
 		if np.max(probs)>np.max(probs_vis) and np.max(probs)>np.max(probs_temp):
-			return label[0],probs,le
+			return label[0],probs,le,'PERM'
 		elif np.max(probs_temp)>np.max(probs_vis)
-			return label_temp[0],probs_temp,le_temp
+			return label_temp[0],probs_temp,le_temp,'TEMP'
 		else
-			return label_vis[0],probs_vis,le_vis
+			return label_vis[0],probs_vis,le_vis,'VIS'
 
 
 
