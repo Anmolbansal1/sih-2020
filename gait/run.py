@@ -36,10 +36,6 @@ def read_video(video_addr):
 
 class everything:
 	def __init__(self,train_input_datadir,train_output_datadir,test_input_datadir=None,test_output_datadir=None,net_pose=None,net_gait=None):
-		self.in_dir=train_input_datadir
-		self.out_dir=train_output_datadir
-		self.threshold=50
-		
 		if net_pose==None or net_gait==None:
 			self.net_pose=HumanPoseIRNetwork()
 			self.net_gait=GaitNetwork(recurrent_unit = 'GRU', rnn_layers = 2)
@@ -52,14 +48,7 @@ class everything:
 
 		self.path_to_test_videos=test_input_datadir
 		self.path_to_test_frames=test_output_datadir
-
-		if net_pose==None or net_gait==None:
-			self.label_filename=os.path.join(os.getcwd(),'saved_files','labelencoder.pkl')
-			self.classifier_filename=os.path.join(os.getcwd(),'saved_files','classifier.pkl')
-		else:
-			self.label_filename=os.path.join(os.getcwd(),'gait','saved_files','labelencoder.pkl')
-			self.classifier_filename=os.path.join(os.getcwd(),'gait','saved_files','classifier.pkl')
-
+		
 	def check_frames(self,in_dir,out_dir):
 		if not os.path.exists(in_dir):
 			print("Data Directory Not Found  :: Exiting")
@@ -123,12 +112,12 @@ class everything:
 		return features,label
 
 
-	def train(self):
-		train_features_in_out_list=self.check_frames(self.in_dir,self.out_dir)
+	def train(self,in_dir,out_dir,type_):
+		train_features_in_out_list=self.check_frames(in_dir,out_dir)
 		if len(train_features_in_out_list)>0:
 			self.convert(train_features_in_out_list)
 
-		features,label=self.make_feature_label(self.out_dir)
+		features,label=self.make_feature_label(out_dir)
 		print('TRAINING STARTED')
 		le=LabelEncoder()
 		label=le.fit_transform(label)
@@ -141,13 +130,22 @@ class everything:
 		print('TRAINING DONE')
 		print('Accuracy on training set --\t{}'.format(model.score(features,label)*100))
 		# print('Accuracy on validation set --\t{}'.format(model.score(val_feature,val_label)*100))
-		
-		with open(self.label_filename, 'wb+') as outfile:
+		if type_=='PERM':
+			label_filename=os.path.join(os.getcwd(),'gait','saved_files','labelencoder.pkl')
+			classifier_filename=os.path.join(os.getcwd(),'gait','saved_files','classifier.pkl')
+		if type_=='VIS':
+			label_filename=os.path.join(os.getcwd(),'gait','saved_files_vis','labelencoder.pkl')
+			classifier_filename=os.path.join(os.getcwd(),'gait','saved_files_vis','classifier.pkl')
+		if type_='TEMP':
+			label_filename=os.path.join(os.getcwd(),'gait','saved_files_temp','labelencoder.pkl')
+			classifier_filename=os.path.join(os.getcwd(),'gait','saved_files_temp','classifier.pkl')
+
+		with open(label_filename, 'wb+') as outfile:
 			pickle.dump(le, outfile)
 		print(le.classes_)
 		print('SAVED LABELENCODER ')
 		
-		with open(self.classifier_filename, 'wb+') as outfile:
+		with open(classifier_filename, 'wb+') as outfile:
 			pickle.dump(model, outfile)
 		print('SAVED CLASSIFIER ')
 
@@ -185,7 +183,7 @@ if __name__=='__main__':
 	test_inp_=os.path.join(os.getcwd(),'testing_files','videos')
 	test_out_=os.path.join(os.getcwd(),'testing_files','frames')
 
-	pr=everything(train_inp_,train_out_,test_inp_,test_out_)
+	pr=everything(test_inp_,test_out_)
 	
 	# model=RandomForestClassifier()
 	is_train=True
