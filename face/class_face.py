@@ -30,6 +30,10 @@ class face_model:
 		self.npy=os.path.join(os.getcwd(),'face','npy')
 		self.MY_FACE_DIRECTORY=os.path.join(os.getcwd(),'face','training_files','face')
 		self.MY_IMG_DIRECTORY=os.path.join(os.getcwd(),'face','training_files','img')
+		self.MY_FACE_DIRECTORY_TEMP=os.path.join(os.getcwd(),'face','training_files_temp','face')
+		self.MY_IMG_DIRECTORY_TEMP=os.path.join(os.getcwd(),'face','training_files_temp','img')
+		self.MY_FACE_DIRECTORY_VIS=os.path.join(os.getcwd(),'face','training_files_vis','face')
+		self.MY_IMG_DIRECTORY_VIS=os.path.join(os.getwd(),'face','training_files_vis','img')
 		self.TRAIN_FRAMES=[]
 		self.write_frames=[]
 		### DEBUGGER
@@ -42,6 +46,17 @@ class face_model:
 			(self.model, self.class_names,self.classes) = pickle.load(infile)
 		self.prediction_probs=np.zeros((1,len(self.classes)))
 
+		self.classifier_filename_exp_vis = os.path.expanduser(self.classifier_filename_vis)
+		with open(self.classifier_filename_exp_vis, 'rb') as infile:
+			(self.model_vis, self.class_names_vis,self.classes_vis) = pickle.load(infile)
+		self.prediction_probs_vis=np.zeros((1,len(self.classes_vis)))
+
+		self.classifier_filename_exp_temp = os.path.expanduser(self.classifier_filename_temp)
+		with open(self.classifier_filename_exp_temp, 'rb') as infile:
+			(self.model_temp, self.class_names_temp,self.classes_temp) = pickle.load(infile)
+		self.prediction_probs_temp=np.zeros((1,len(self.classes_temp)))
+
+		
 		self.num_imgs=0
 		with tf.Graph().as_default():
 			self.gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
@@ -121,9 +136,14 @@ class face_model:
 				scaled_reshape.append(scaled[i].reshape(-1,self.input_image_size,self.input_image_size,3))
 				feed_dict = {self.images_placeholder: scaled_reshape[i], self.phase_train_placeholder: False}
 				emb_array[0, :] = self.sess.run(self.embeddings, feed_dict=feed_dict)
+				
 				predictions = self.model.predict_proba(emb_array)
-				print(predictions)
+				predictions_vis=self.model_vis.predict_proba(emb_array)
+				prediction_temp=self.model_temp.predict_proba(emb_array)
+				# print(predictions)
 				self.prediction_probs+=predictions
+				self.prediction_probs_temp+=prediction_temp
+				self.prediction_probs_vis+=prediction_probs_vis
 				# if np.max(predictions) > 0.90:
 				# 	self.prediction_class[np.argmax(predictions)+1]+=1
 				# else:
@@ -134,14 +154,27 @@ class face_model:
 	def get_output(self):
 		if self.num_imgs>0:
 			self.prediction_probs/=self.num_imgs
-		return self.classes[np.argmax(self.prediction_probs)],self.prediction_probs,self.classes,self.num_imgs
-		# return self.classes[np.argmax(self.prediction_class/self.num_imgs)]
+			self.prediction_probs_vis/=self.num_imgs
+			self.prediction_probs_temp/self.num_imgs
+		if self.prediction_probs>self.prediction_probs_vis and self.prediction_probs>self.prediction_probs_temp:
+			return self.classes[np.argmax(self.prediction_probs)],self.prediction_probs,self.classes,self.num_imgs
+		elif self.prediction_probs_vis>self.prediction_probs_temp:
+			return self.classes_vis[np.argmax(self.prediction_probs_vis)],self.prediction_probs_vis,self.classes_vis,self.num_imgs
+		else:
+			return self.classes_temp[np.argmax(self.prediction_probs_temp)],self.prediction_probs_temp,self.classes_temp,self.num_imgs
 
-	def save(self,label):
+	def save(self,label,type_):
+		if type_=='PERM':
+			dir_=os.path.join(os.getcwd(),'face','my_classes',label)
+		if type_=='VIS':
+			dir_=os.path.join(os.getcwd(),'face','my_classes_vis',label)
+		if type_=='TEMP':
+			dir_=os.path.join(os.getcwd(),'face','my_classes_temp',label)
+
 		(h, w) = self.write_frames[0].shape[:2]
-		dir_=os.path.join(os.getcwd(),'face','my_classes',label)
 		if not os.path.exists(dir_):
 			os.makedirs(dir_)
+
 		writer = cv2.VideoWriter(os.path.join(dir_,self.save_name), self.fourcc, 10,(w, h), True)
 		for frame in self.write_frames:
 			writer.write(frame)
@@ -162,39 +195,83 @@ class face_model:
 		with open(self.classifier_filename_exp, 'rb') as infile:
 			(self.model, self.class_names,self.classes) = pickle.load(infile)
 		self.prediction_probs=np.zeros((1,len(self.classes)))
+
+		self.classifier_filename_exp_vis = os.path.expanduser(self.classifier_filename_vis)
+		with open(self.classifier_filename_exp_vis, 'rb') as infile:
+			(self.model_vis, self.class_names_vis,self.classes_vis) = pickle.load(infile)
+		self.prediction_probs_vis=np.zeros((1,len(self.classes_vis)))
+
+		self.classifier_filename_exp_temp = os.path.expanduser(self.classifier_filename_temp)
+		with open(self.classifier_filename_exp_temp, 'rb') as infile:
+			(self.model_temp, self.class_names_temp,self.classes_temp) = pickle.load(infile)
+		self.prediction_probs_temp=np.zeros((1,len(self.classes_temp)))
 		print('Start Recognition!')
 
-	def re_train(self):
+	def re_train(self,type_):
 		print('MAKING FACES')
-		img_to_face(self.MY_IMG_DIRECTORY,self.MY_FACE_DIRECTORY)
-		print('FACES DONE')
-
-		print('START RE-TRAINING')
-		train_again(self.MY_FACE_DIRECTORY)
+		if type_=='PERM':
+			img_to_face(self.MY_IMG_DIRECTORY,self.MY_FACE_DIRECTORY)
+			print('FACES DONE')
+			train_again(datadir=self.MY_FACE_DIRECTORY,classifier_filename=os.path.join(os.getcwd(),'face','class','classifier.pkl'))
+		if type_=='VIS'
+			img_to_face(self.MY_IMG_DIRECTORY_VIS,self.MY_FACE_DIRECTORY_VIS)
+			print('FACES DONE')
+			train_again(datadir=self.MY_FACE_DIRECTORY_VIS,classifier_filename=os.path.join(os.getcwd(),'face','class_vis','classifier.pkl'))
+		if type_=='TEMP'
+			img_to_face(self.MY_IMG_DIRECTORY_TEMP,self.MY_FACE_DIRECTORY_TEMP)
+			print('FACES DONE')
+			train_again(datadir=self.MY_FACE_DIRECTORY_TEMP,classifier_filename=os.path.join(os.getcwd(),'face','class_temp','classifier.pkl'))
+		
 		print('RE-TRAINING DONE')
 
-	def remove_class(self,labels):
-		for label in labels:
-			shutil.rmtree(os.path.join(self.MY_IMG_DIRECTORY,label))
-			shutil.rmtree(os.path.join(self.MY_FACE_DIRECTORY,label))
-			shutil.rmtree(os.path.join(os.getcwd(),'face','my_classes',label))
-		self.re_train()
-		
-	def add_frames(self,label):
-		PATH=os.path.join(self.MY_IMG_DIRECTORY,label)
-		for frame in self.TRAIN_FRAMES:
-			cv2.imwrite(os.path.join(PATH,'ActiOn_{}.png'.format(len(os.listdir(PATH)))),frame)
-		print('IMAGES ADDED IN DIRECTORY')
+	def remove_class(self,labels,type_):
+		if type_=='PERM':
+			for label in labels:
+				shutil.rmtree(os.path.join(self.MY_IMG_DIRECTORY,label))
+				shutil.rmtree(os.path.join(self.MY_FACE_DIRECTORY,label))
+				shutil.rmtree(os.path.join(os.getcwd(),'face','my_classes',label))
+		if type_=='VIS':
+			for label in labels:
+				shutil.rmtree(os.path.join(self.MY_IMG_DIRECTORY_VIS,label))
+				shutil.rmtree(os.path.join(self.MY_FACE_DIRECTORY_VIS,label))
+				shutil.rmtree(os.path.join(os.getcwd(),'face','my_classes_vis',label))
+		if type_=='TEMP':
+			for label in labels:
+				shutil.rmtree(os.path.join(self.MY_IMG_DIRECTORY_TEMP,label))
+				shutil.rmtree(os.path.join(self.MY_FACE_DIRECTORY_TEMP,label))
+				shutil.rmtree(os.path.join(os.getcwd(),'face','my_classes_temp',label))
 
-	def add_class(self,label):
-		PATH=os.path.join(self.MY_IMG_DIRECTORY,label)
+		self.re_train(type_)
+
+
+	def add_class(self,label,type_):
+		if type_=='PERM':
+			PATH=os.path.join(self.MY_IMG_DIRECTORY,label)
+		if type_=='VIS':
+			PATH=os.path.join(self.MY_IMG_DIRECTORY_VIS,label)
+		if type_=='TEMP':
+			PATH=os.path.join(self.MY_IMG_DIRECTORY_TEMP,label)
+
 		if not os.path.exists(PATH):
 			os.makedirs(PATH)
 
 		for frame in self.TRAIN_FRAMES:
 			cv2.imwrite(os.path.join(PATH,'ActiOn_{}.png'.format(len(os.listdir(PATH)))),frame)
-		print('IMAGES ADDED IN DIRECTORY AND RETRAINING')
-		self.re_train()
+		print('IMAGES ADDED IN DIRECTORY')
+		self.re_train(type_)
+
+		
+	def add_frames(self,label,type_):
+		if type_=='PERM':
+			PATH=os.path.join(self.MY_IMG_DIRECTORY,label)
+		if type_=='VIS':
+			PATH=os.path.join(self.MY_IMG_DIRECTORY_VIS,label)
+		if type_=='TEMP':
+			PATH=os.path.join(self.MY_IMG_DIRECTORY_TEMP,label)
+			
+		for frame in self.TRAIN_FRAMES:
+			cv2.imwrite(os.path.join(PATH,'ActiOn_{}.png'.format(len(os.listdir(PATH)))),frame)
+		print('IMAGES ADDED IN DIRECTORY')
 
 
 if __name__=='__main__':
