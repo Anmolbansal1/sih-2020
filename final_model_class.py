@@ -10,7 +10,7 @@ class final_model_():
 	def get_gait_frames(self,frames_center,frames):
 		self.gait_frames=frames
 		self.gait_frames_center=frames_center
-
+		
 
 	def get_gait_probs(self,gait_probs):
 		self.gait_probs=np.squeeze(gait_probs)
@@ -18,12 +18,13 @@ class final_model_():
 	def get_face_probs(self,face_probs):
 		self.face_probs=np.squeeze(face_probs)
 
-	def get_face_classes(self,classes):
+	def get_face_classes(self,classes,type_):
 		self.face_classes=classes
+		self.type_=type_
 
-
-	def get_gait_classes(self,label_enc):
+	def get_gait_classes(self,label_enc,type_):
 		self.label_enc_gait=label_enc
+		self.type_=type_
 
 	def ensemble_model(self):
 		# MAKE AN OPTIMIZER FOR X1*probs_face1+X2*probs_face2+...XN-1*probs_gaitk+XN*probs_gait  ---> X(shape) output do 1 layer NN 
