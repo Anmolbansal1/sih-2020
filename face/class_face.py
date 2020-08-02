@@ -157,11 +157,11 @@ class face_model:
 			self.prediction_probs_vis/=self.num_imgs
 			self.prediction_probs_temp/self.num_imgs
 		if self.prediction_probs>self.prediction_probs_vis and self.prediction_probs>self.prediction_probs_temp:
-			return self.classes[np.argmax(self.prediction_probs)],self.prediction_probs,self.classes,self.num_imgs
+			return self.classes[np.argmax(self.prediction_probs)],self.prediction_probs,self.classes,self.num_imgs,'PERM'
 		elif self.prediction_probs_vis>self.prediction_probs_temp:
-			return self.classes_vis[np.argmax(self.prediction_probs_vis)],self.prediction_probs_vis,self.classes_vis,self.num_imgs
+			return self.classes_vis[np.argmax(self.prediction_probs_vis)],self.prediction_probs_vis,self.classes_vis,self.num_imgs,'VIS'
 		else:
-			return self.classes_temp[np.argmax(self.prediction_probs_temp)],self.prediction_probs_temp,self.classes_temp,self.num_imgs
+			return self.classes_temp[np.argmax(self.prediction_probs_temp)],self.prediction_probs_temp,self.classes_temp,self.num_imgs,'TEMP'
 
 	def save(self,label,type_):
 		if type_=='PERM':
